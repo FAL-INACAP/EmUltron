@@ -12,6 +12,12 @@
 import { useEffect, useRef } from "react";
 import type { N64Core } from "@/types/emulatorjs-com";
 
+declare global {
+  interface Window {
+    EJS_onGameStart?: () => void;
+  }
+}
+
 // ── Constantes ────────────────────────────────────────────────────────
 const LOADER_URL = "https://www.emulatorjs.com/loader.js";
 const LOADER_ID = "ejs-com-loader";
@@ -77,6 +83,26 @@ export function useEmulator({
     window.EJS_Buttons = {
       screenRecord: false,
       cheat: false,
+    };
+    window.EJS_onGameStart = function () {
+      const pads = navigator.getGamepads();
+
+      console.log("Gamepads:", pads);
+
+      const pad = pads[0];
+
+      if (pad?.vibrationActuator) {
+        pad.vibrationActuator.playEffect("dual-rumble", {
+          duration: 300,
+          weakMagnitude: 1,
+          strongMagnitude: 1,
+          startDelay: 0,
+        });
+
+        console.log("Rumble soportado");
+      } else {
+        console.log("Este mando no soporta vibración");
+      }
     };
 
     // ── 2. Limpiar loader anterior si existe (re-montaje en StrictMode) ──
