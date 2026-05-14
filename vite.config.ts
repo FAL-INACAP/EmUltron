@@ -101,7 +101,7 @@ function generateOgPages(env: Record<string, string>) {
     name: "generate-og-pages",
     apply: "build" as const,
     async closeBundle() {
-      const BASE_URL = "https://em-ultron.vercel.app";
+      const BASE_URL = "https://emultron.vercel.app";
       const clientId = env.VITE_TWITCH_CLIENT_ID;
       const clientSecret = env.VITE_TWITCH_CLIENT_SECRET;
 
