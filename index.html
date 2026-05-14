@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ─── SEO básico ─────────────────────────────────────────────────────── -->
+    <title>EmUltron — Nintendo 64 en tu navegador</title>
+    <meta
+      name="description"
+      content="Emula clásicos de Nintendo 64 directamente en tu navegador. Sin instalaciones, sin plugins."
+    />
+    <link rel="canonical" href="https://emultron.vercel.app" />
+
+    <!-- ─── Open Graph (Facebook, WhatsApp, Telegram, iMessage…) ─────────── -->
+    <!--
+      OG_IMAGE: coloca una imagen de 1200×630 px en /public/og-image.jpg
+      Recomendado: screenshot del hero o un logo + fondo oscuro.
+      Herramienta rápida: https://og-playground.vercel.app
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="EmUltron" />
+    <meta property="og:url" content="https://emultron.vercel.app" />
+    <meta
+      property="og:title"
+      content="EmUltron — Nintendo 64 en tu navegador"
+    />
+    <meta
+      property="og:description"
+      content="Emula clásicos de Nintendo 64 directamente en tu navegador. Sin instalaciones, sin plugins."
+    />
+    <meta
+      property="og:image"
+      content="https://emultron.vercel.app/og-image.jpg"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="EmUltron — Emulador N64" />
+    <meta property="og:locale" content="es_CL" />
+
+    <!-- ─── Twitter / X Card ─────────────────────────────────────────────── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="EmUltron — Nintendo 64 en tu navegador"
+    />
+    <meta
+      name="twitter:description"
+      content="Emula clásicos de Nintendo 64 directamente en tu navegador. Sin instalaciones, sin plugins."
+    />
+    <meta
+      name="twitter:image"
+      content="https://emultron.vercel.app/og-image.jpg"
+    />
+    <meta name="twitter:image:alt" content="EmUltron — Emulador N64" />
+
+    <!-- ─── Fonts ─────────────────────────────────────────────────────────── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
+<!--
+  ══════════════════════════════════════════════════════════════════════════════
+  OG TAGS POR JUEGO (para cuando compartes /emulator/<gameId>)
+  ══════════════════════════════════════════════════════════════════════════════
+
+  Como esto es una SPA de Vite, los crawlers solo ven este index.html.
+  Para OG tags dinámicos por juego tienes dos opciones limpias:
+
+  OPCIÓN A — Archivos HTML estáticos por ruta (recomendado, cero deps extra)
+  ─────────────────────────────────────────────────────────────────────────────
+  Crea public/emulator/<gameId>/index.html para cada juego con sus propias
+  meta tags. El archivo solo necesita los <meta> y un <script> que redirige
+  al root de React. Ejemplo en public/emulator/super-mario-64/index.html:
+
+    <!doctype html>
+    <html lang="es">
+      <head>
+        <meta charset="UTF-8" />
+        <title>Super Mario 64 — EmUltron</title>
+        <meta property="og:title" content="Super Mario 64 — EmUltron" />
+        <meta property="og:description" content="Juega Super Mario 64 en el navegador" />
+        <meta property="og:image" content="https://emultron.app/covers/Super_Mario_64.png" />
+        <meta property="og:url" content="https://emultron.app/emulator/super-mario-64" />
+        <meta http-equiv="refresh" content="0;url=/" />
+      </head>
+      <body><script>window.location.replace('/');</script></body>
+    </html>
+
+  El browser va directo a "/", React recoge la URL original del historial
+  y renderiza la página correcta. Los crawlers solo llegan hasta el <meta>.
+
+  OPCIÓN B — Netlify / Vercel Edge Functions
+  ─────────────────────────────────────────────────────────────────────────────
+  Si deploys en Netlify/Vercel, crea una edge function que intercepta
+  /emulator/:gameId, genera HTML con los meta tags correctos, y deja pasar
+  el resto al SPA. Así no tienes que crear archivos manuales.
+  Ver: https://docs.netlify.com/edge-functions/overview/
+
+  ══════════════════════════════════════════════════════════════════════════════
+-->

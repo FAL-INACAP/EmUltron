@@ -1,0 +1,153 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   EmulatorPlayer.module.css
+   Colores hardcoded que coinciden con los tokens vault de Tailwind.
+   No depende de variables CSS globales (que no estaban definidas).
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Contenedor principal ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  animation: overlayIn 0.2s ease-out;
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  height: 44px;
+  background: #0c0c18;
+  border-bottom: 1px solid #1e1e35;
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Indicador de plataforma */
+.platform {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #52607a;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+/* Separador vertical */
+.divider {
+  width: 1px;
+  height: 16px;
+  background: #1e1e35;
+}
+
+/* Nombre del juego */
+.headerTitle {
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Botón cerrar */
+.closeBtn {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #52607a;
+  background: transparent;
+  border: 1px solid #1e1e35;
+  padding: 0.35rem 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+  white-space: nowrap;
+}
+
+.closeBtn:hover {
+  color: #fff;
+  border-color: #52607a;
+}
+
+/* ── Área del emulador ── */
+.emulatorWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+  /* CRÍTICO: sin min-height: 0 el flex item no puede encogerse por debajo
+     de su contenido — el emulador desbordará el viewport. */
+  min-height: 0;
+}
+
+.emulatorDiv {
+  /* emulatorjs.com monta un <iframe> que ocupa el 100% de este div.
+     Ancho máximo 960px — aspect-ratio calcula la altura automáticamente.
+     NO combinar height: 100% con aspect-ratio: el browser prioriza
+     las dimensiones explícitas y el canvas queda estirado. */
+  width: 100%;
+  max-width: 960px;
+  aspect-ratio: 4 / 3;
+  /* En móvil landscape evita que supere el espacio disponible */
+  max-height: calc(100vh - 80px);
+}
+
+/* ── Footer ── */
+.footer {
+  padding: 0 1.25rem;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0c0c18;
+  border-top: 1px solid #1e1e35;
+  flex-shrink: 0;
+}
+
+.footerText {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #52607a;
+  letter-spacing: 0.05em;
+}
+
+.footerText strong {
+  color: #8a8fa8;
+  font-weight: 700;
+}

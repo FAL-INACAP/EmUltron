@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #060609;
+    color: #f3f4f6;
+    font-family: "Rajdhani", sans-serif;
+    font-size: 16px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid de fondo muy sutil */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 229, 255, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 229, 255, 0.018) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #060609;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e1e35;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 229, 255, 0.2);
+  }
+}
+
+@layer utilities {
+  /* EmulatorJS canvas — NO tocar */
+  #emulatorjs-player canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    contain: strict;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    will-change: contents;
+  }
+  #emulatorjs-player,
+  #emulatorjs-player > div {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}

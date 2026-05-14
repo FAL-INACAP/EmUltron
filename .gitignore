@@ -1,0 +1,74 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencias
+node_modules
+
+# Build / distribución
+dist
+dist-ssr
+build
+
+# Archivos de entorno
+.env
+.env.*
+!.env.example
+
+# Cache
+.cache
+.temp
+.tmp
+.vite
+vite.config.ts.timestamp-*
+*.tsbuildinfo
+
+# IDEs
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# Sistema operativo
+Thumbs.db
+Desktop.ini
+
+# Coverage / testing
+coverage
+*.lcov
+
+# Archivos temporales
+*.local
+
+# Package managers
+.pnpm-store
+.npm
+.yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Bun
+bun.lockb
+
+# Turbo / monorepos
+.turbo
+
+# Parcel
+.parcel-cache
+
+# Next.js (por si mezclas proyectos)
+.next
+out
+
+# Nuxt
+.nuxt
+
+# SvelteKit
+.svelte-kit
