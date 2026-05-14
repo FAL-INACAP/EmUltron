@@ -60,6 +60,28 @@ async function fetchIGDBGames(
   return res.json() as Promise<IGDBGame[]>;
 }
 
+// ─── Reemplaza un meta tag específico en el HTML ──────────────────────────────
+//
+// IMPORTANTE: NO usar [\s\S]*? en estos regex — ese patrón cruza límites de
+// tags y puede consumir desde el primer <meta> del documento hasta el tag que
+// buscamos, destruyendo charset, viewport y todos los tags intermedios.
+//
+// [^>]* es seguro: no puede cruzar el cierre > de ningún tag.
+// El único ">" dentro de un meta tag es el de />, que está explícito al final.
+
+function replaceMeta(
+  html: string,
+  attr: string, // p.ej. 'property="og:title"'
+  newTag: string, // el <meta ... /> completo que reemplaza
+  deleteTag = false,
+): string {
+  // Escapar comillas para usar en regex
+  const safeAttr = attr.replace(/"/g, '\\"');
+  // [^>]* no cruza tag boundaries — seguro para meta tags multilínea
+  const pattern = new RegExp(`<meta[^>]*${safeAttr}[^>]*\\/>\\n?`);
+  return deleteTag ? html.replace(pattern, "") : html.replace(pattern, newTag);
+}
+
 // ─── Plugin principal ─────────────────────────────────────────────────────────
 
 /**
@@ -67,10 +89,12 @@ async function fetchIGDBGames(
  *   dist/emulator/<gameId>/index.html
  *
  * Llama directo a Twitch + IGDB en tiempo real durante el build.
- * Sin caché local. En inglés está bien.
  *
  * Usuarios normales cargan el mismo HTML → React arranca →
  * React Router lee la URL y renderiza el juego correcto. ✅
+ *
+ * Crawlers (WhatsApp, Twitter, Telegram…) ven el HTML estático con las
+ * OG tags del juego gracias al vercel.json que sirve filesystem primero. ✅
  */
 function generateOgPages(env: Record<string, string>) {
   return {
@@ -112,7 +136,7 @@ function generateOgPages(env: Record<string, string>) {
         const description = igdb?.summary
           ? igdb.summary.slice(0, 250).trimEnd() +
             (igdb.summary.length > 250 ? "…" : "")
-          : "Play classic Nintendo 64 games directly in your browser.";
+          : "Juega clásicos de Nintendo 64 directamente en tu navegador.";
 
         // Portada de IGDB primero; si no, la imagen local; si no, la genérica
         const imageUrl = igdb?.cover
@@ -123,53 +147,91 @@ function generateOgPages(env: Record<string, string>) {
 
         const pageUrl = `${BASE_URL}/emulator/${game.id}`;
 
-        const html = indexHtml
-          .replace(
-            /<title>[^<]*<\/title>/,
-            `<title>${escapeHtml(title)}</title>`,
-          )
-          .replace(
-            /<meta[\s\S]*?property="og:title"[\s\S]*?\/>/,
-            `<meta property="og:title" content="${escapeHtml(title)}" />`,
-          )
-          .replace(
-            /<meta[\s\S]*?property="og:description"[\s\S]*?\/>/,
-            `<meta property="og:description" content="${escapeHtml(description)}" />`,
-          )
-          .replace(
-            /<meta[\s\S]*?property="og:image"[\s\S]*?\/>/,
-            `<meta property="og:image" content="${escapeHtml(imageUrl)}" />`,
-          )
-          .replace(/<meta[\s\S]*?property="og:image:width"[\s\S]*?\/>\n?/, "")
-          .replace(/<meta[\s\S]*?property="og:image:height"[\s\S]*?\/>\n?/, "")
-          .replace(
-            /<meta[\s\S]*?property="og:image:alt"[\s\S]*?\/>/,
-            `<meta property="og:image:alt" content="${escapeHtml(title)}" />`,
-          )
-          .replace(
-            /<meta[\s\S]*?property="og:url"[\s\S]*?\/>/,
-            `<meta property="og:url" content="${pageUrl}" />`,
-          )
-          .replace(
-            /<meta[\s\S]*?name="twitter:title"[\s\S]*?\/>/,
-            `<meta name="twitter:title" content="${escapeHtml(title)}" />`,
-          )
-          .replace(
-            /<meta[\s\S]*?name="twitter:description"[\s\S]*?\/>/,
-            `<meta name="twitter:description" content="${escapeHtml(description)}" />`,
-          )
-          .replace(
-            /<meta[\s\S]*?name="twitter:image"[\s\S]*?\/>/,
-            `<meta name="twitter:image" content="${escapeHtml(imageUrl)}" />`,
-          )
-          .replace(
-            /<meta[\s\S]*?name="twitter:image:alt"[\s\S]*?\/>/,
-            `<meta name="twitter:image:alt" content="${escapeHtml(title)}" />`,
-          )
-          .replace(
-            /<link rel="canonical"[^>]*>/,
-            `<link rel="canonical" href="${pageUrl}" />`,
-          );
+        // ── Reemplazos seguros con [^>]* en vez de [\s\S]*? ────────────────
+        let html = indexHtml;
+
+        // <title>
+        html = html.replace(
+          /<title>[^<]*<\/title>/,
+          `<title>${escapeHtml(title)}</title>`,
+        );
+
+        // name="description"
+        html = replaceMeta(
+          html,
+          `name="description"`,
+          `<meta name="description" content="${escapeHtml(description)}" />\n`,
+        );
+
+        // canonical
+        html = html.replace(
+          /<link rel="canonical"[^>]*>/,
+          `<link rel="canonical" href="${pageUrl}" />`,
+        );
+
+        // og:title
+        html = replaceMeta(
+          html,
+          `property="og:title"`,
+          `<meta property="og:title" content="${escapeHtml(title)}" />\n`,
+        );
+
+        // og:description
+        html = replaceMeta(
+          html,
+          `property="og:description"`,
+          `<meta property="og:description" content="${escapeHtml(description)}" />\n`,
+        );
+
+        // og:image (reemplazar URL, borrar width/height ya que IGDB varía)
+        html = replaceMeta(
+          html,
+          `property="og:image"`,
+          `<meta property="og:image" content="${escapeHtml(imageUrl)}" />\n`,
+        );
+        html = replaceMeta(html, `property="og:image:width"`, "", true);
+        html = replaceMeta(html, `property="og:image:height"`, "", true);
+
+        // og:image:alt
+        html = replaceMeta(
+          html,
+          `property="og:image:alt"`,
+          `<meta property="og:image:alt" content="${escapeHtml(title)}" />\n`,
+        );
+
+        // og:url
+        html = replaceMeta(
+          html,
+          `property="og:url"`,
+          `<meta property="og:url" content="${pageUrl}" />\n`,
+        );
+
+        // twitter:title
+        html = replaceMeta(
+          html,
+          `name="twitter:title"`,
+          `<meta name="twitter:title" content="${escapeHtml(title)}" />\n`,
+        );
+
+        // twitter:description
+        html = replaceMeta(
+          html,
+          `name="twitter:description"`,
+          `<meta name="twitter:description" content="${escapeHtml(description)}" />\n`,
+        );
+
+        // twitter:image — usar (?!:alt) para no pisar twitter:image:alt
+        html = html.replace(
+          /<meta[^>]*name="twitter:image"(?!:alt)[^>]*\/>\n?/,
+          `<meta name="twitter:image" content="${escapeHtml(imageUrl)}" />\n`,
+        );
+
+        // twitter:image:alt
+        html = replaceMeta(
+          html,
+          `name="twitter:image:alt"`,
+          `<meta name="twitter:image:alt" content="${escapeHtml(title)}" />\n`,
+        );
 
         const dir = join("dist/emulator", game.id);
         mkdirSync(dir, { recursive: true });
@@ -189,9 +251,6 @@ function generateOgPages(env: Record<string, string>) {
 }
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-
-// ⚠️  COOP/COEP headers eliminados — eran para EJS_threads de emulatorjs.ORG.
-// emulatorjs.COM gestiona threading internamente y NO requiere esos headers.
 
 export default defineConfig(({ mode }) => {
   // loadEnv lee .env y .env.local según el modo (development / production)

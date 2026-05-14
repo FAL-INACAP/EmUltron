@@ -12,6 +12,7 @@
 // El proxy de vite.config.ts reenvía las rutas /api/* a Twitch e IGDB.
 
 import type { IGDBGame } from "../types";
+import { igdbCache } from "../data/igdbCache";
 
 // ─── Token cache en memoria (los tokens duran ~60 días) ───────────────────────
 let tokenCache: { access_token: string; expires_at: number } | null = null;
@@ -53,7 +54,6 @@ async function getAccessToken(): Promise<string> {
 }
 
 // ─── Traducción inline — Google Translate (gratis, sin API key) ──────────────
-// Mismo endpoint que usaba el script, ahora corre en el browser sin scripts.
 async function translateToSpanish(text: string): Promise<string> {
   if (!text) return text;
   try {
@@ -86,7 +86,12 @@ export function igdbCoverUrl(imageId: string, size = "t_cover_big"): string {
 
 // ─── Fetch individual (cache primero, luego live) ─────────────────────────────
 export async function fetchIGDBGame(slug: string): Promise<IGDBGame> {
-  // 1. Fetch live desde IGDB vía proxy
+  // 1. Retornar desde caché si existe (sin llamadas de red)
+  if (igdbCache[slug]) {
+    return igdbCache[slug];
+  }
+
+  // 2. Fetch live desde IGDB vía proxy
   const token = await getAccessToken();
   const clientId = import.meta.env.VITE_TWITCH_CLIENT_ID as string;
 
@@ -107,7 +112,7 @@ export async function fetchIGDBGame(slug: string): Promise<IGDBGame> {
 
   const game = games[0];
 
-  // 2. Traducción inline al español — sin scripts, sin builds manuales
+  // 3. Traducción inline al español — sin scripts, sin builds manuales
   if (game.summary) {
     game.summary = await translateToSpanish(game.summary);
   }
